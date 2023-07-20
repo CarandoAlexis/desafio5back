@@ -8,7 +8,7 @@ router.post("/register", async (req, res) => {
   try {
     const body = req.body;
 
-    // Verificar si el correo electrónico ya existe en la base de datos
+    // Verifica si el correo electrónico ya existe en la base de datos
     const existingUser = await userModel.findOne({ email: body.email });
 
     if (existingUser) {
@@ -16,10 +16,10 @@ router.post("/register", async (req, res) => {
       return res.redirect("/register?error=El correo electrónico ya está registrado");
     }
 
-    // Verificar si el usuario a registrar es el administrador
+    // Verifica si el usuario a registrar es el administrador
     const isAdmin = body.email === "adminCoder@coder.com" && body.password === "adminCod3r123";
 
-    // Agregar el rol "admin" si es el administrador, de lo contrario, agregar "usuario"
+    // Agrega el rol "admin" si es el administrador, de lo contrario, agrega "usuario"
     const newUser = await userModel.create({
       ...body,
       role: isAdmin ? "admin" : "usuario",
@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
     return res.redirect("/login");
   } catch (error) {
     console.log("error:", error);
-    // Manejar otros errores aquí, si es necesario
+    
     res.status(500).json({ message: "Error al registrar el usuario" });
   }
 });
@@ -41,7 +41,7 @@ router.post("/login", async (req, res) => {
     // Para validar el login con email y contraseña
     const { email, password } = req.body;
 
-    // Obtener la sesión actual
+    // Para obtener la sesión actual
     const session = req.session;
 
     const findUser = await userModel.findOne({ email });

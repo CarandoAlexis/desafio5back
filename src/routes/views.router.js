@@ -57,12 +57,11 @@ router.get("/login", async (req, res) => {
 
 router.get("/register", async (req, res) => {
   try {
-    const errorMessage = req.query.error; // Leer el mensaje de error de los parámetros de consulta
+    const errorMessage = req.query.error; // Lee el mensaje de error de los parámetros de consulta
 
     res.render("register", { error: errorMessage });
   } catch (error) {
     console.error("Error al mostrar la vista de registro:", error);
-    // Manejar otros errores aquí, si es necesario
     res.status(500).json({ message: "Error al mostrar la vista de registro" });
   }
 });

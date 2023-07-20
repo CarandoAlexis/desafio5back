@@ -1,3 +1,11 @@
+La logica del proyecto se encuentra realizada dentro de los siguientes archivos:
+dao/models/user.model.js
+middleware/auth.middleware.js
+routes/session.router.js
+router/views.router.js
+app.js
+y las vistas en handlebars estan dentro de views
+
 A continuacion se detallan las rutas disponibles:
 
 Registro de usuarios:
