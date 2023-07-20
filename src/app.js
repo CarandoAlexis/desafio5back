@@ -4,7 +4,6 @@ import handlebars from "express-handlebars";
 import viewsRouter from "./routes/views.router.js";
 import __dirname from "./utils.js";
 import productsRouter from "./routes/products.router.js";
-import cartsRouter from "./routes/carts.router.js";
 import displayRoutes from "express-routemap";
 import connectDatabase from './services/mongodb.service.js';
 import cookieParser from "cookie-parser";
@@ -35,7 +34,6 @@ connectDatabase()
     app.use(express.urlencoded({ extended: true }));
     app.use("/", viewsRouter);
     app.use("/api/products", productsRouter);
-    app.use("/api/carts", cartsRouter);
     
     app.use(session({
       store: mongoStore.create({
@@ -47,6 +45,10 @@ connectDatabase()
       resave: false,
       saveUninitialized: false,
     }))
+    //redirecciona directo al register por motivos practicos nada mas
+    app.get("/", (req, res) => {
+      res.redirect("/register");
+    });
     
     app.use("/products", authMdw , (req, res, next) => {
       return res.render("productList");
