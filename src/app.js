@@ -18,14 +18,14 @@ import mongoStore from "connect-mongo";
 // Conexión a la base de datos
 connectDatabase()
   .then(() => {
-    // Crear instancias de los managers y modelos después de que se haya establecido la conexión a la base de datos
+    // Crea instancias de los managers y modelos después de que se haya establecido la conexión a la base de datos
 
     const productManager = new MongoProductManager();
     const cartModel = new CartModel();
 
-    // Crear la aplicación Express y configurarla
+  
     const app = express();
-    const port = 8008;
+    const port = 8080;
     app.use(express.static(`${__dirname}/public`));
     app.engine("handlebars", handlebars.engine());
     app.set("views", `${__dirname}/views`);
@@ -47,16 +47,28 @@ connectDatabase()
       resave: false,
       saveUninitialized: false,
     }))
-    app.use("/products", authMdw, (req, res, next) => {
+    
+    app.use("/products", authMdw , (req, res, next) => {
       return res.render("productList");
     });
-    app.use("/api/session/", sessionRouter);
-    app.use("/profile", authMdw, (req, res, next) => {
-      // En esta parte solo estamos verificando que el usuario esté autenticado y luego dejamos que el siguiente middleware maneje la lógica de renderizar la vista de perfil.
-      next();
+    app.get("/profile", authMdw, async (req, res) => {
+      try {
+        // Renderiza la vista de perfil con los datos del usuario
+        res.render("profile", {
+          first_name: req.session?.user?.first_name,
+          last_name: req.session?.user?.last_name,
+          email: req.session?.user?.email,
+          age: req.session?.user?.age,
+        });
+      } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error);
+        res.status(500).json({ status: "error", message: "Error al obtener los datos del usuario" });
+      }
     });
+    app.use("/api/session/", sessionRouter);
+    
 
-    const server = app.listen(port, () => {
+    app.listen(port, () => {
       displayRoutes(app);
       console.log(`Server listening on port ${port}`);
     });

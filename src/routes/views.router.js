@@ -21,19 +21,19 @@ router.get('/products', async (req, res) => {
       ];
     }
 
-    // Calcular el total de páginas y el número de documentos a saltar
+    // Calcula el total de páginas y el número de documentos a saltar
     const totalProducts = await Product.countDocuments(filter).lean();
     const totalPages = Math.ceil(totalProducts / limit);
     const skip = (page - 1) * limit;
 
-    // Obtener los productos según los parámetros de la consulta
+    // Obtiene los productos según los parámetros de la consulta
     const products = await Product.find(filter)
       .sort({ price: sort })
       .limit(limit)
       .skip(skip)
       .lean();
 
-    // Renderizar la vista con los productos y la información de paginación
+    // Renderiza la vista con los productos y la información de paginación
     res.render('productList', {
       products,
       totalPages,
@@ -61,16 +61,12 @@ router.get("/register", async (req, res) => {
 
 router.get("/profile", authMdw, async (req, res) => {
   try {
-    // Obtener todos los productos
-    const products = await Product.find().lean();
-
-    // Renderizar la vista de perfil con los datos del usuario y los productos
-    res.render("profile", {
+    // Renderiza la vista de perfil con los datos del usuario
+    res.render('profile', {
       first_name: req.session?.user?.first_name,
       last_name: req.session?.user?.last_name,
       email: req.session?.user?.email,
       age: req.session?.user?.age,
-      products,
     });
   } catch (error) {
     console.error("Error al obtener los datos del usuario:", error);
@@ -78,5 +74,4 @@ router.get("/profile", authMdw, async (req, res) => {
   }
 });
 
-// Exportar el router
 export default router;

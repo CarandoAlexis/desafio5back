@@ -7,60 +7,73 @@ const router = Router();
 router.post("/register", async (req, res) => {
   try {
     const body = req.body;
-    const newUser = await userModel.create(body);
-    console.log("nuevo usuario:",newUser);
 
-    req.session.user = { ...body };
+    // Verificar si el usuario a registrar es el administrador
+    const isAdmin = body.email === "adminCoder@coder.com" && body.password === "admin";
+
+    // Agregar el rol "admin" si es el administrador, de lo contrario, agregar "usuario"
+    const newUser = await userModel.create({
+      ...body,
+      role: isAdmin ? "admin" : "usuario",
+    });
+
+    console.log("nuevo usuario:", newUser);
+
+    req.session.user = { ...newUser.toObject() };
     return res.render("login");
   } catch (error) {
-    console.log("error:",error);
+    console.log("error:", error);
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
-    //para validar el login con email y contraseña
+    // Para validar el login con email y contraseña
     const { email, password } = req.body;
+
+    // Obtener la sesión actual
     const session = req.session;
-    console.log(
-      "🚀 ~ file: session.routes.js:17 ~ router.post ~ session:",
-      session
-    );
 
     const findUser = await userModel.findOne({ email });
-    console.log("usuario encontrado:",findUser);
 
     if (!findUser) {
-      return res
-        .status(401)
-        .json({ message: "usuario no registrado/existente" });
+      return res.status(401).json({ message: "Usuario no registrado/existente" });
     }
 
     if (findUser.password !== password) {
-      return res
-        .status(401)
-        .json({ message: "password incorrecto" });
+      return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    req.session.user = {
+    // Verifica el rol del usuario
+    if (findUser.email === "adminCoder@coder.com" && findUser.password === "admin") {
+      findUser.role = "admin";
+    } else {
+      findUser.role = "usuario";
+    }
+
+    // Establece el usuario en la sesión
+    session.user = {
       ...findUser.toObject(),
       password: "",
     };
 
-    // Obtener todos los productos
+    console.log("Usuario establecido en la sesión:", session.user);
+
+    // Para obtener todos los productos
     const products = await Product.find().lean();
 
-    return res.render('profile',{
-      first_name: req.session?.user?.first_name || findUser.first_name,
-      last_name: req.session?.user?.last_name || findUser.last_name,
-      email: req.session?.user?.email || email,
-      age: req.session?.user?.age || findUser.age,
+    // Renderiza la vista de perfil con los datos del usuario y los productos
+    return res.render("profile", {
+      first_name: session?.user?.first_name || findUser.first_name,
+      last_name: session?.user?.last_name || findUser.last_name,
+      email: session?.user?.email || email,
+      age: session?.user?.age || findUser.age,
+      role: session?.user?.role,
       products,
-      
-      
-    }, );
+    });
   } catch (error) {
-    
+    console.error("Error al obtener los datos del usuario:", error);
+    res.status(500).json({ status: "error", message: "Error al obtener los datos del usuario" });
   }
 });
 
